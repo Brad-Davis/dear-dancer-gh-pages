@@ -168,8 +168,6 @@ const effectFXAA = new ShaderPass(FXAAShader);
 effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
 composer.addPass(effectFXAA);
 
-const files = ['./glbFiles/A.gltf', './glbFiles/B.gltf', './glbFiles/C.gltf', './glbFiles/D.gltf', './glbFiles/E.gltf', './glbFiles/F.gltf', './glbFiles/G.gltf', './glbFiles/H.gltf', './glbFiles/I.gltf', './glbFiles/J.gltf', './glbFiles/K.gltf', './glbFiles/L.gltf', './glbFiles/M.gltf', './glbFiles/N.gltf', './glbFiles/O.gltf', './glbFiles/P.gltf', './glbFiles/Q.gltf', './glbFiles/R.gltf', './glbFiles/S.gltf', './glbFiles/T.gltf', './glbFiles/U.gltf', './glbFiles/V.gltf', './glbFiles/W.gltf', './glbFiles/X.gltf', './glbFiles/Y.gltf', './glbFiles/Z.gltf'];
-
 let currentAnimationIndex = 0;
 
 
@@ -184,18 +182,6 @@ function setWeight( action, weight ) {
 
 }
 
-async function getAllAnimations(files) {
-    const animations = await Promise.all(files.map(async (file) => {
-        const fbx = await new Promise((resolve, reject) => {
-            loader.load(file, resolve, undefined, reject);
-        });
-        return fbx.animations[fbx.animations.length - 1];
-    }));
-    
-    console.log(animations);    
-    return animations;
-}
-
 let mixer;
 let animations;
 let font;
@@ -208,20 +194,10 @@ let alphabeticalActions;
 let weights;
 let globalLetter;
 
-function loadFile(url) {
-    fetch(url)
-        .then(response => response.text())
-        .then(data => {
-        return data;
-        })
-        .catch(error => console.error('Error loading file:', error));
-}
 
-const glbFile = loadFile('https://www.deardancer.io/s/allLettersV3.glb');
-console.log('GLB');
-console.log(glbFile)
 
-loader.load(glbFile, async (gltf) => {
+
+loader.load('./allLettersV3.glb', async (gltf) => {
 // loader.load('./glbFiles/alternativeModel.gltf', async (gltf) => {
     console.log("gltf");
     dancerResizer(350);
@@ -731,7 +707,6 @@ function drag(event) {
     }
 }
 
-fullDancer.addEventListener('mousemove', debouncedDrag);
 
 function endDrag() {
     isDragging = false;
