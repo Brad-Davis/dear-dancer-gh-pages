@@ -88,8 +88,8 @@ camera.position.x = 0;
 window.camera = camera;
 
 
-const typewriterClicks = [new Audio ('/typewriter1.mp3'), new Audio('/typewriter2.mp3'), new Audio('/typewriter3.mp3')];
-const typewriterNewline = new Audio('/typewriterNewline.mp3');
+const typewriterClicks = [new Audio ('https://github.com/Brad-Davis/dear-dancer-gh-pages/raw/refs/heads/main/typewriter1.mp3'), new Audio('https://github.com/Brad-Davis/dear-dancer-gh-pages/raw/refs/heads/main/typewriter2.mp3'), new Audio('https://github.com/Brad-Davis/dear-dancer-gh-pages/raw/refs/heads/main/typewriter3.mp3')];
+const typewriterNewline = new Audio('https://github.com/Brad-Davis/dear-dancer-gh-pages/raw/refs/heads/main/typewriterNewline.mp3');
 
 // Add lights to the scene
 // const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft white light
