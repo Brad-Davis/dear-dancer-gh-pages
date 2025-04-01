@@ -195,7 +195,7 @@ let weights;
 let globalLetter;
 
 
-
+let globalDancer;
 
 loader.load('./allLettersV3.glb', async (gltf) => {
 // loader.load('./glbFiles/alternativeModel.gltf', async (gltf) => {
@@ -204,8 +204,18 @@ loader.load('./allLettersV3.glb', async (gltf) => {
     clock = new THREE.Clock();
     console.log(gltf);
     gltf.scene.scale.set(1,1, 1); 
+    globalDancer = gltf.scene;
     gltf.scene.position.set(0, 0, 0);
-    const blackMaterial = new THREE.MeshStandardMaterial({ color: "black" });
+    console.log("ALERT")
+    console.log(gltf.scene);
+    console.log(gltf.scene.children[1].geometry);
+    // const edges = new THREE.EdgesGeometry(gltf.scene.children[5].geometry);
+    // const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+    // gltf.scene.children[5].model.(line); // Add edges to the model instead of the scene
+
+    const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+    outlinePass.selectedObjects = [...gltf.scene.children];
+    composer.addPass(outlinePass);
 
     const cloth = gltf.scene.getObjectByName('Cloth');
     cloth.visible = false;
@@ -541,6 +551,10 @@ function sendDancerText() {
     }
 }
 
+function dancerRotation(rotation) {
+    globalDancer.rotation.y = rotation;
+}
+
 // Resize the renderer when the window is resized
 
 
@@ -617,6 +631,12 @@ soundToggle.addEventListener('click', () => {
     soundOn = !soundOn;
 });
 
+const floorToggle = document.getElementById('dancer-floor-toggle');
+
+floorToggle.addEventListener('click', () => {
+    floor.visible = !floor.visible;
+});
+
 function moveOnType(amount) {
     const screenWidth = window.innerWidth;
     const canvasWidth = canvas.offsetWidth;
@@ -651,8 +671,14 @@ const settingsButton = document.getElementById('dancer-settings-button');
 
 settingsButton.addEventListener('click', toggleSettings);
 
+const settingsMenu = document.getElementById('dancer-settings-panel');
+
+settingsMenu.addEventListener('mousedown', (event) => startDrag(event, settingsMenu));
+settingsMenu.addEventListener('mousemove', (event) => drag(event, settingsMenu));
+settingsMenu.addEventListener('mouseup', endDrag);
+settingsMenu.addEventListener('mouseleave', endDrag);
+
 function toggleSettings() {
-    const settingsMenu = document.getElementById('dancer-settings-panel');
     settingsMenu.classList.toggle('active');
     settingsButton.classList.toggle('active');
 }
@@ -672,38 +698,68 @@ function toggleTextInput() {
 // ...
 
 let isDragging = false;
-let initialX = fullDancer.offsetLeft;
-let initialY = fullDancer.offsetTop;
+let dancerInitialX = fullDancer.offsetLeft;
+let dancerInitialY = fullDancer.offsetTop;
+let settingsInitialX = settingsMenu.offsetLeft;
+let settingsInitialY = settingsMenu.offsetTop;
 
-fullDancer.addEventListener('mousedown', startDrag);
-fullDancer.addEventListener('mousemove', drag);
+fullDancer.addEventListener('mousedown', (event) => startDrag(event, fullDancer));
+fullDancer.addEventListener('mousemove', (event) => drag(event, fullDancer));
 fullDancer.addEventListener('mouseup', endDrag);
 fullDancer.addEventListener('mouseleave', endDrag);
 
-function startDrag(event) {
+function startDrag(event, self) {
     console.log("startDrag");
-    console.log(fullDancer.offsetLeft, fullDancer.offsetTop);
+    console.log(self.offsetLeft, self.offsetTop);
     isDragging = true;
-    initialX = event.clientX;
-    initialY = event.clientY;
+    if (self.id + "" === 'full-dancer') {
+        dancerInitialX = event.clientX;
+        dancerInitialY = event.clientY;
+    } else {
+        settingsInitialX = event.clientX;
+        settingsInitialY = event.clientY;
+    }
+    
 }
 
-function drag(event) {
-    if (isDragging) {
-        const dx = event.clientX - initialX;
-        const dy = event.clientY - initialY;
-        const currentX = fullDancer.offsetLeft + dx * 10;
-        const currentY = fullDancer.offsetTop + dy * 10;
-        const minX = fullDancer.offsetWidth/2  - 50;
-        const minY = fullDancer.offsetHeight/2  - 30;
-        const maxX = window.innerWidth - minX;
-        const maxY = window.innerHeight - minY;
-        const constrainedX = Math.max(minX, Math.min(maxX, currentX));
-        const constrainedY = Math.max(minY, Math.min(maxY, currentY));
-        fullDancer.style.left = constrainedX + 'px';
-        fullDancer.style.top = constrainedY + 'px';
-        initialX = event.clientX;
-        initialY = event.clientY;
+let isSliderActive = false;
+
+
+
+function drag(event, self) {
+    if (isDragging && !isSliderActive) {
+        if (self.id + "" === 'full-dancer') {
+            const dx = event.clientX - dancerInitialX;
+            const dy = event.clientY - dancerInitialY;
+            const currentX = self.offsetLeft + dx * 10;
+            const currentY = self.offsetTop + dy * 10;
+            const minX = self.offsetWidth/2  - 50;
+            const minY = self.offsetHeight/2  - 30;
+            const maxX = window.innerWidth - minX;
+            const maxY = window.innerHeight - minY;
+            const constrainedX = Math.max(minX, Math.min(maxX, currentX));
+            const constrainedY = Math.max(minY, Math.min(maxY, currentY));
+            self.style.left = constrainedX + 'px';
+            self.style.top = constrainedY + 'px';
+            dancerInitialX = event.clientX;
+            dancerInitialY = event.clientY;
+        } else {
+            const dx = event.clientX - settingsInitialX;
+            const dy = event.clientY - settingsInitialY;
+            const currentX = self.offsetLeft + dx;
+            const currentY = self.offsetTop + dy;
+            const minX = 0;
+            const minY = 0;
+            const maxX = window.innerWidth - minX;
+            const maxY = window.innerHeight - minY;
+            const constrainedX = Math.max(minX, Math.min(maxX, currentX));
+            const constrainedY = Math.max(minY, Math.min(maxY, currentY));
+            self.style.left = constrainedX + 'px';
+            self.style.top = constrainedY + 'px';
+            settingsInitialX = event.clientX;
+            settingsInitialY = event.clientY;
+        }
+        
     }
 }
 
@@ -715,9 +771,32 @@ function endDrag() {
 // ...
 
 const danceSizeSlider = document.getElementById('dance-size-slider');
+const danceRotationSlider = document.getElementById('dance-rotation-slider');
 
 danceSizeSlider.addEventListener('input', () => {
+    isSliderActive = true;
     dancerResizer(danceSizeSlider.value)
+});
+
+danceRotationSlider.addEventListener('input', () => {
+    isSliderActive = true;
+    dancerRotation(danceRotationSlider.value/360 * Math.PI * 2);
+});
+
+danceSizeSlider.addEventListener('mousedown', () => {
+    isSliderActive = true;
+});
+
+danceSizeSlider.addEventListener('mouseup', () => {
+    isSliderActive = false;
+});
+
+danceRotationSlider.addEventListener('mousedown', () => {
+    isSliderActive = true;
+});
+
+danceRotationSlider.addEventListener('mouseup', () => {
+    isSliderActive = false;
 });
 
 function dancerResizer(size) {
@@ -762,6 +841,8 @@ function enableTextInput() {
     const buttonInput = document.getElementById('send-dancer-text');
     buttonInput.disabled = false;
 }
+
+
 
 dancerResizer(350);
 

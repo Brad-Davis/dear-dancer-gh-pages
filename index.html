@@ -104,7 +104,7 @@ canvas {
     border: 2px solid white;
   }
 
-  #dance-size-slider {
+  #dance-size-slider, #dance-rotation-slider {
     appearance :none;
     background: none;
     cursor: pointer;
@@ -121,7 +121,7 @@ canvas {
     z-index: 0;
   }
 
-  #dance-size-slider[type='range']::-webkit-slider-thumb {
+  #dance-size-slider[type='range']::-webkit-slider-thumb, #dance-rotation-slider[type='range']::-webkit-slider-thumb {
     width: 17px;
     -webkit-appearance: none;
     height: 17px;
@@ -167,16 +167,33 @@ canvas {
   }
 
   #dancer-settings-panel {
-    position: absolute;
+    position: fixed;
     top: 20px;
-    right: 20px;
+    left: calc(100% - 180px);
     background-color: #25408F;
     color: white;
     padding: 15px;
-    border-radius: 20%;
+    border-radius: 35px;
     font-size: 1.2em;
     display: none;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  #dancer-settings-panel p {
+   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
+  }
+
+  #dancer-floor {
+    padding-bottom: 10px;
   }
 
   #dancer-settings-panel.active {
@@ -298,8 +315,14 @@ canvas {
     </div>
     <div id="dancer-settings-panel">
       <div>
-        <p>size</p>
+        <p>Size</p>
         <input type="range" id="dance-size-slider" min="200" max="750" value="350" step="1"> 
+          <div id="dancer-slider-line"></div>
+        </input>
+      </div>
+      <div>
+        <p>Rotation</p>
+        <input type="range" id="dance-rotation-slider" min="0" max="360" value="0" step="1"> 
           <div id="dancer-slider-line"></div>
         </input>
       </div>
@@ -307,6 +330,13 @@ canvas {
         <span>Sound</span>
         <label class="switch-dancer">
           <input id="dancer-sound-toggle" type="checkbox">
+          <span class="slider-dancer round-dancer"></span>
+        </label>
+      </div>
+      <div id="dancer-floor">
+        <span>floor</span>
+        <label class="switch-dancer">
+            <input id="dancer-floor-toggle" value="true" type="checkbox" checked>
           <span class="slider-dancer round-dancer"></span>
         </label>
       </div>
