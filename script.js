@@ -515,6 +515,14 @@ async function handleLiveInput(event) {
 const sendDancerTextButton = document.getElementById('send-dancer-text');
 
 sendDancerTextButton.addEventListener('click', sendDancerText);
+const textInputDancer = document.getElementById('text-input-dancer');
+textInputDancer.addEventListener('keydown', handleSendDancerTextKey);
+
+function handleSendDancerTextKey(event) {
+    if (event.key === 'Enter') {
+        sendDancerText();
+    }
+}
 
 let curInputIndex = 0;
 function sendDancerText() {
