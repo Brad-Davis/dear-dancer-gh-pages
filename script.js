@@ -763,12 +763,28 @@ const danceRotationSlider = document.getElementById('dance-rotation-slider');
 
 danceSizeSlider.addEventListener('input', () => {
     isSliderActive = true;
-    dancerResizer(danceSizeSlider.value)
+    dancerResizer(danceSizeSlider.value);
 });
 
 danceRotationSlider.addEventListener('input', () => {
     isSliderActive = true;
     dancerRotation(danceRotationSlider.value/360 * Math.PI * 2);
+});
+
+danceSizeSlider.addEventListener('touchstart', () => {
+    isSliderActive = true;
+});
+
+danceSizeSlider.addEventListener('touchend', () => {
+    isSliderActive = false;
+});
+
+danceRotationSlider.addEventListener('touchstart', () => {
+    isSliderActive = true;
+});
+
+danceRotationSlider.addEventListener('touchend', () => {
+    isSliderActive = false;
 });
 
 danceSizeSlider.addEventListener('mousedown', () => {
