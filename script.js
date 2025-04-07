@@ -686,6 +686,11 @@ settingsMenu.addEventListener('mousemove', (event) => drag(event, settingsMenu))
 settingsMenu.addEventListener('mouseup', endDrag);
 settingsMenu.addEventListener('mouseleave', endDrag);
 
+settingsMenu.addEventListener('touchstart', (event) => startDrag(event, settingsMenu));
+settingsMenu.addEventListener('touchmove', (event) => drag(event, settingsMenu));
+settingsMenu.addEventListener('touchend', endDrag);
+settingsMenu.addEventListener('touchcancel', endDrag);
+
 function toggleSettings() {
     settingsMenu.classList.toggle('active');
     settingsButton.classList.toggle('active');
@@ -715,6 +720,11 @@ fullDancer.addEventListener('mousedown', (event) => startDrag(event, fullDancer)
 fullDancer.addEventListener('mousemove', (event) => drag(event, fullDancer));
 fullDancer.addEventListener('mouseup', endDrag);
 fullDancer.addEventListener('mouseleave', endDrag);
+
+fullDancer.addEventListener('touchstart', (event) => startDrag(event, fullDancer));
+fullDancer.addEventListener('touchmove', (event) => drag(event, fullDancer));
+fullDancer.addEventListener('touchend', endDrag);
+fullDancer.addEventListener('touchcancel', endDrag);
 
 function startDrag(event, self) {
     console.log("startDrag");
