@@ -771,6 +771,26 @@ danceRotationSlider.addEventListener('input', () => {
     dancerRotation(danceRotationSlider.value/360 * Math.PI * 2);
 });
 
+danceSizeSlider.addEventListener('touchmove', (event) => {
+    isSliderActive = true;
+    const touch = event.touches[0];
+    let value = (touch.clientX - danceSizeSlider.getBoundingClientRect().left) / danceSizeSlider.offsetWidth * danceSizeSlider.max;
+    if (value > danceSizeSlider.max) value = danceSizeSlider.max;
+    if (value < danceSizeSlider.min) value = danceSizeSlider.min;
+    danceSizeSlider.value = value;
+    dancerResizer(value);
+});
+
+danceRotationSlider.addEventListener('touchmove', (event) => {
+    isSliderActive = true;
+    const touch = event.touches[0];
+    let value = (touch.clientX - danceRotationSlider.getBoundingClientRect().left) / danceRotationSlider.offsetWidth * danceRotationSlider.max;
+    if (value > danceRotationSlider.max) value = danceRotationSlider.max;
+    if (value < danceRotationSlider.min) value = danceRotationSlider.min;
+    danceRotationSlider.value = value;
+    dancerRotation(value / 360 * Math.PI * 2);
+});
+
 danceSizeSlider.addEventListener('touchstart', () => {
     isSliderActive = true;
 });
