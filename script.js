@@ -595,7 +595,7 @@ soundToggle.addEventListener('click', () => {
     soundOn = !soundOn;
 });
 
-soundToggle.addEventListener('touchend', () => { 
+soundToggle.addEventListener('touchend', (event) => { 
     soundOn = !soundOn;
 });
 
@@ -605,7 +605,8 @@ floorToggle.addEventListener('click', () => {
     floor.visible = !floor.visible;
 });
 
-floorToggle.addEventListener('touchend', () => {
+floorToggle.addEventListener('touchend', (event) => {
+    console.log(event);
     floor.visible = !floor.visible;
 });
 
@@ -693,7 +694,6 @@ fullDancer.addEventListener('touchend', endDrag);
 fullDancer.addEventListener('touchcancel', endDrag);
 
 function startDrag(event, self) {
-    event.preventDefault();
     isDragging = true;
 
     const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
@@ -763,6 +763,7 @@ const danceRotationSlider = document.getElementById('dance-rotation-slider');
 
 danceSizeSlider.addEventListener('input', () => {
     isSliderActive = true;
+    console.log('hi')
     dancerResizer(danceSizeSlider.value);
 });
 
