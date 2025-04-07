@@ -595,11 +595,20 @@ soundToggle.addEventListener('click', () => {
     soundOn = !soundOn;
 });
 
+soundToggle.addEventListener('touchend', () => { 
+    soundOn = !soundOn;
+});
+
 const floorToggle = document.getElementById('dancer-floor-toggle');
 
 floorToggle.addEventListener('click', () => {
     floor.visible = !floor.visible;
 });
+
+floorToggle.addEventListener('touchend', () => {
+    floor.visible = !floor.visible;
+});
+
 
 function moveOnType(amount) {
     const screenWidth = window.innerWidth;
@@ -633,6 +642,7 @@ document.addEventListener('keydown', handleLiveInput);
 const settingsButton = document.getElementById('dancer-settings-button');
 
 settingsButton.addEventListener('click', toggleSettings);
+settingsButton.addEventListener('touchend', toggleSettings);
 
 const settingsMenu = document.getElementById('dancer-settings-panel');
 
@@ -653,6 +663,7 @@ function toggleSettings() {
 
 const textInputButton = document.getElementById('dancer-input-button');
 textInputButton.addEventListener('click', toggleTextInput);
+textInputButton.addEventListener('touchend', toggleTextInput);
 
 let liveTextInput = true;
 
