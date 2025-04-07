@@ -60,7 +60,6 @@ class Queue {
     }
 
     toString() {
-        console.log(this.items);
         let output = "";
         for (let i = 0; i < this.items.length; i++) {
             output += String.fromCharCode(this.items[i] + 65);
@@ -115,7 +114,6 @@ const floorGeometry = new THREE.CircleGeometry(1, 64);
 
 // Create a material for the floor that can receive shadows
 const texture = new THREE.TextureLoader().load('./map7.jpg');
-console.log(texture);
 const floorMaterial = new THREE.MeshStandardMaterial({ 
     alphaMap: texture, 
     color: 0x25408f,
@@ -198,53 +196,23 @@ let globalLetter;
 let globalDancer;
 
 loader.load('./allLettersV3.glb', async (gltf) => {
-// loader.load('./glbFiles/alternativeModel.gltf', async (gltf) => {
-    console.log("gltf");
     dancerResizer(350);
     clock = new THREE.Clock();
-    console.log(gltf);
     gltf.scene.scale.set(1,1, 1); 
     globalDancer = gltf.scene;
     gltf.scene.position.set(0, 0, 0);
-    console.log("ALERT")
-    console.log(gltf.scene);
-    console.log(gltf.scene.children[1].geometry);
-    // const edges = new THREE.EdgesGeometry(gltf.scene.children[5].geometry);
-    // const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
-    // gltf.scene.children[5].model.(line); // Add edges to the model instead of the scene
 
-    const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+    const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2), scene, camera);
     outlinePass.selectedObjects = [...gltf.scene.children];
     composer.addPass(outlinePass);
 
     const cloth = gltf.scene.getObjectByName('Cloth');
     cloth.visible = false;
 
-    // Traverse the model and apply the black material to each mesh
-    // gltf.scene.traverse((child) => {
-    //     if (child.isMesh) {
-    //         child.material = blackMaterial;
-    //         child.material.side = blackMaterial // Set the material to render on the back side of the faces
-    //     }
-    //     console.log(child);
-    // });
-
     const ttfLoader = new TTFLoader();
     await ttfLoader.load('./fonts/SpecialElite-Regular.ttf', (json) => {
         font = fontLoader.parse(json);
     });
-
-    // Apply the black material to the bottom of the feet
-    // const feet = gltf.scene.getObjectByName('feet');
-    // console.log("feet?")
-    // console.log(feet);
-    // if (feet) {
-    //     feet.traverse((child) => {
-    //         if (child.isMesh) {
-    //             child.material = blackMaterial;
-    //         }
-    //     });
-    // }
 
     gltf.scene.traverse((child) => {
         if (child.isMesh) {
@@ -370,10 +338,6 @@ function fadeBetweenWeights(actionIndex, fadeDuration) {
     // Set the previous action's weight to 1
     prevActionIndex = weights.findIndex(weight => weight > 0);
 
-    console.log("prevActionIndex " + prevActionIndex);
-    console.log("actionIndex " + actionIndex);
-    console.log("weight of new action: " + weights[actionIndex]);
-
 
     if (prevActionIndex !== -1 && prevActionIndex !== actionIndex) {
         setWeight(alphabeticalActions[prevActionIndex], 1);
@@ -381,7 +345,6 @@ function fadeBetweenWeights(actionIndex, fadeDuration) {
 
     // Set the current action's weight to 0
     if (prevActionIndex !== actionIndex) {
-        console.log("stopping index " + actionIndex + "To get started again");
         setWeight(alphabeticalActions[actionIndex], 0);
     }
 
@@ -389,7 +352,7 @@ function fadeBetweenWeights(actionIndex, fadeDuration) {
         alphabeticalActions[actionIndex].reset();
     }
 
-    console.log("fadeBetweenWeights");
+    // console.log("fadeBetweenWeights");
 
     // Start the transition
     const transitionStartTime = Date.now();
@@ -435,7 +398,6 @@ async function runQueue() {
     while (!textQueue.isEmpty()) {
         const index = textQueue.dequeue();
         curInputIndex += 1;
-        console.log("index " + index);
         if (index === undefined) {
             continue;
         }
@@ -473,7 +435,6 @@ async function handleLiveInput(event) {
         return;
     }
     const key = event.key;
-    console.log(key);
     if (key === 'Backspace') {
         textQueue.deleteLast(); // Remove item from end of queue
         return;
@@ -499,7 +460,7 @@ async function handleLiveInput(event) {
     textQueue.enqueue(index);
     // updateTextQueueDisplay();
     if (!isAnimationRunning) {
-        console.log("starting runQueue");
+        // console.log("starting runQueue");
         isAnimationRunning = true;
         runQueue();
     }
@@ -507,7 +468,7 @@ async function handleLiveInput(event) {
     clearTimeout(timer);
     timer = setTimeout(() => {
         textQueue.clear();
-        console.log("clearing queue");
+        // console.log("clearing queue");
         // updateTextQueueDisplay();
     }, 4000);
 }
@@ -533,7 +494,6 @@ function sendDancerText() {
     curInputIndex = 0;
     for(let i = 0; i < text.length; i++) {
         const key = text[i];
-        console.log(key);
         if (key.length > 1 && key !== ' ') {
             return;
         }
@@ -552,7 +512,6 @@ function sendDancerText() {
         textQueue.enqueue(index);
         // updateTextQueueDisplay();
         if (!isAnimationRunning) {
-            console.log("starting runQueue");
             isAnimationRunning = true;
             runQueue();
         }
@@ -569,11 +528,8 @@ function dancerRotation(rotation) {
 
 function spawnLetter(index) {
     const charCode = index + 97;
-    console.log(String.fromCharCode(charCode));
 
     const letter = "" + String.fromCharCode(charCode);
-    console.log(font);
-    console.log(letter);
     const geometry = new TextGeometry(letter, {
         font: font,
         size: 1.6,
@@ -649,7 +605,6 @@ function moveOnType(amount) {
     const screenWidth = window.innerWidth;
     const canvasWidth = canvas.offsetWidth;
     const currentLeft = parseInt(canvas.style.left) || 0;
-    console.log(currentLeft);
     const newLeft = currentLeft + amount; // Adjust the shift amount as needed
 
     if (newLeft + canvasWidth > screenWidth) {
@@ -727,28 +682,32 @@ fullDancer.addEventListener('touchend', endDrag);
 fullDancer.addEventListener('touchcancel', endDrag);
 
 function startDrag(event, self) {
-    console.log("startDrag");
-    console.log(self.offsetLeft, self.offsetTop);
+    event.preventDefault();
+    isDragging = true;
+
+    const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+    const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+    console.log(clientX, clientY);
     isDragging = true;
     if (self.id + "" === 'full-dancer') {
-        dancerInitialX = event.clientX;
-        dancerInitialY = event.clientY;
+        dancerInitialX = clientX;
+        dancerInitialY = clientY;
     } else {
-        settingsInitialX = event.clientX;
-        settingsInitialY = event.clientY;
+        settingsInitialX = clientX;
+        settingsInitialY = clientY;
     }
     
 }
 
 let isSliderActive = false;
 
-
-
 function drag(event, self) {
+    const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+    const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
     if (isDragging && !isSliderActive) {
         if (self.id + "" === 'full-dancer') {
-            const dx = event.clientX - dancerInitialX;
-            const dy = event.clientY - dancerInitialY;
+            const dx = clientX - dancerInitialX;
+            const dy = clientY - dancerInitialY;
             const currentX = self.offsetLeft + dx * 10;
             const currentY = self.offsetTop + dy * 10;
             const minX = self.offsetWidth/2  - 50;
@@ -759,11 +718,11 @@ function drag(event, self) {
             const constrainedY = Math.max(minY, Math.min(maxY, currentY));
             self.style.left = constrainedX + 'px';
             self.style.top = constrainedY + 'px';
-            dancerInitialX = event.clientX;
-            dancerInitialY = event.clientY;
+            dancerInitialX = clientX;
+            dancerInitialY = clientY;
         } else {
-            const dx = event.clientX - settingsInitialX;
-            const dy = event.clientY - settingsInitialY;
+            const dx = clientX - settingsInitialX;
+            const dy = clientY - settingsInitialY;
             const currentX = self.offsetLeft + dx;
             const currentY = self.offsetTop + dy;
             const minX = 0;
@@ -774,8 +733,8 @@ function drag(event, self) {
             const constrainedY = Math.max(minY, Math.min(maxY, currentY));
             self.style.left = constrainedX + 'px';
             self.style.top = constrainedY + 'px';
-            settingsInitialX = event.clientX;
-            settingsInitialY = event.clientY;
+            settingsInitialX = clientX;
+            settingsInitialY = clientY;
         }
         
     }
