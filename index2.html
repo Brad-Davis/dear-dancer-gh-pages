@@ -3,7 +3,20 @@
 <head>
   <title>My Web Page</title>
 </head>
+<style>
+    /* styles.css */
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        border: none;
+      background: transparent;
+      pointer-events: auto; /* Allow interaction with iframe */
+    }
+</style>
 <body>
-    <iframe id="three-iframe" src="https://brad-davis.github.io/dear-dancer-gh-pages/"></iframe>
+    <iframe style="pointer-events: none;" id="three-iframe" allowtransparency="true" src="https://brad-davis.github.io/dear-dancer-gh-pages/"></iframe>
 </body>
 </html>
