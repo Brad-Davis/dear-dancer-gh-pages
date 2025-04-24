@@ -22,18 +22,13 @@
     position: fixed;
     left: 20px;
     height: 35px;
-    border: #25408F solid 2px;
+    border: none;
     left: 20px;
     bottom: 10px;
     right: 20px;
     width: calc(100% - 40px);
-    display: flex;
     align-items: center;
-    opacity: 0;
     justify-content: center;
-    /* visibility: hidden; */
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    background-color: white;
     pointer-events: auto;
   }
 </style>
@@ -103,7 +98,6 @@
       let isSliderActive = false;
 
       function drag(event, self) {
-        console.log(self);
           const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
           const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
           if (isDragging && !isSliderActive) {
@@ -114,8 +108,8 @@
                   const currentY = self.offsetTop + dy;
                   const minX = 0;
                   const minY = 0;
-                  const maxX = window.innerWidth - minX;
-                  const maxY = window.innerHeight - minY;
+                  const maxX = document.innerWidth - minX;
+                  const maxY = document.innerHeight - minY;
                   const constrainedX = Math.max(minX, Math.min(maxX, currentX));
                   const constrainedY = Math.max(minY, Math.min(maxY, currentY));
                   self.style.left = constrainedX + 'px';
@@ -195,8 +189,6 @@
 
 
       function startDrag(event, self) {
-          console.log(event);
-          console.log(self);
           isDragging = true;
 
           const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
@@ -219,10 +211,13 @@
               const dy = clientY - dancerInitialY;
               const currentX = self.offsetLeft + dx;
               const currentY = self.offsetTop + dy;
+              console.log(self);
               const minX = self.offsetWidth/2  - 50;
               const minY = self.offsetHeight/2  - 30;
+              console.log(minX, minY);
               const maxX = window.innerWidth - minX;
               const maxY = window.innerHeight - minY;
+              console.log(maxX, maxY);
               const constrainedX = Math.max(minX, Math.min(maxX, currentX));
               const constrainedY = Math.max(minY, Math.min(maxY, currentY));
               self.style.left = constrainedX + 'px';
@@ -250,7 +245,5 @@
   
   </script>
 
-        
-      </script>
 </body>
 </html>
