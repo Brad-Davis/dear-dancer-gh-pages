@@ -410,7 +410,7 @@ async function runQueue() {
         moveOnType(20);
         playClickSound();
         
-        showInputText(curInputIndex)
+        // showInputText(curInputIndex)
         const duration = alphabeticalAnimations[index].duration / updateSpeed;
         //Remove letter!
         fadeBetweenWeights(index, globalFadeDuration);
@@ -422,19 +422,20 @@ async function runQueue() {
         prevActionIndex = index;
     }
     fadeToZero();
-    enableTextInput();
+    // enableTextInput();
     isAnimationRunning = false;
 }
 
 
 let prevLength = 0;
 let timer;
+let liveTextInput = false;
 
 async function handleLiveInput(event) {
     if (!liveTextInput) {
         return;
     }
-    const key = event.key;
+    const key = event;
     if (key === 'Backspace') {
         textQueue.deleteLast(); // Remove item from end of queue
         return;
@@ -474,22 +475,27 @@ async function handleLiveInput(event) {
 }
 
 const sendDancerTextButton = document.getElementById('send-dancer-text');
+const textInputButton = document.getElementById('dancer-input-button');
+textInputButton.addEventListener('click', toggleTextInput);
+textInputButton.addEventListener('touchend', toggleTextInput);
 
-sendDancerTextButton.addEventListener('click', sendDancerText);
-const textInputDancer = document.getElementById('text-input-dancer');
-textInputDancer.addEventListener('keydown', handleSendDancerTextKey);
+function toggleTextInput() {
+    liveTextInput = !liveTextInput;
+    console.log("live text: " + liveTextInput)
+    textInputButton.classList.toggle('active');
+    window.parent.postMessage({liveTextInput: liveTextInput}, "*");
+}  
 
-function handleSendDancerTextKey(event) {
-    if (event.key === 'Enter') {
-        sendDancerText();
-    }
-}
+// sendDancerTextButton.addEventListener('click', sendDancerText);
+// const textInputDancer = document.getElementById('text-input-dancer');
+// textInputDancer.addEventListener('keydown', handleSendDancerTextKey);
+
 
 let curInputIndex = 0;
 function sendDancerText() {
-    const textInput = document.getElementById('text-input-dancer');
-    const text = textInput.value;
-    disableTextInput();
+    // const textInput = document.getElementById('text-input-dancer');
+    // const text = textInput.value;
+    // disableTextInput();
     curInputValue = text;
     curInputIndex = 0;
     for(let i = 0; i < text.length; i++) {
@@ -589,27 +595,6 @@ function playClickSound() {
     }
 }
 
-const soundToggle= document.getElementById('dancer-sound-toggle');
-
-soundToggle.addEventListener('click', () => { 
-    soundOn = !soundOn;
-});
-
-soundToggle.addEventListener('touchend', (event) => { 
-    soundOn = !soundOn;
-});
-
-const floorToggle = document.getElementById('dancer-floor-toggle');
-
-floorToggle.addEventListener('click', () => {
-    floor.visible = !floor.visible;
-});
-
-floorToggle.addEventListener('touchend', (event) => {
-    console.log(event);
-    floor.visible = !floor.visible;
-});
-
 
 function moveOnType(amount) {
     const screenWidth = window.innerWidth;
@@ -636,7 +621,7 @@ function moveOnEnter() {
 
 window.fadeBetweenWeights = fadeBetweenWeights; 
 
-document.addEventListener('keydown', handleLiveInput);
+
 
 
 
@@ -644,185 +629,17 @@ const settingsButton = document.getElementById('dancer-settings-button');
 
 settingsButton.addEventListener('click', toggleSettings);
 settingsButton.addEventListener('touchend', toggleSettings);
-
-const settingsMenu = document.getElementById('dancer-settings-panel');
-
-settingsMenu.addEventListener('mousedown', (event) => startDrag(event, settingsMenu));
-settingsMenu.addEventListener('mousemove', (event) => drag(event, settingsMenu));
-settingsMenu.addEventListener('mouseup', endDrag);
-settingsMenu.addEventListener('mouseleave', endDrag);
-
-settingsMenu.addEventListener('touchstart', (event) => startDrag(event, settingsMenu));
-settingsMenu.addEventListener('touchmove', (event) => drag(event, settingsMenu));
-settingsMenu.addEventListener('touchend', endDrag);
-settingsMenu.addEventListener('touchcancel', endDrag);
+let showSettings = false;
 
 function toggleSettings() {
-    settingsMenu.classList.toggle('active');
     settingsButton.classList.toggle('active');
+    showSettings = !showSettings;
+    window.parent.postMessage({showSettings: showSettings}, "*");
 }
 
-const textInputButton = document.getElementById('dancer-input-button');
-textInputButton.addEventListener('click', toggleTextInput);
-textInputButton.addEventListener('touchend', toggleTextInput);
-
-let liveTextInput = true;
-
-function toggleTextInput() {
-    const typingPanel = document.getElementById('text-section-dancer');
-    typingPanel.classList.toggle('active');
-    liveTextInput = !liveTextInput;
-    textInputButton.classList.toggle('active');
-}  
 
 // ...
 
-let isDragging = false;
-let dancerInitialX = fullDancer.offsetLeft;
-let dancerInitialY = fullDancer.offsetTop;
-let settingsInitialX = settingsMenu.offsetLeft;
-let settingsInitialY = settingsMenu.offsetTop;
-
-fullDancer.addEventListener('mousedown', (event) => startDrag(event, fullDancer));
-fullDancer.addEventListener('mousemove', (event) => drag(event, fullDancer));
-fullDancer.addEventListener('mouseup', endDrag);
-fullDancer.addEventListener('mouseleave', endDrag);
-
-fullDancer.addEventListener('touchstart', (event) => startDrag(event, fullDancer));
-fullDancer.addEventListener('touchmove', (event) => drag(event, fullDancer));
-fullDancer.addEventListener('touchend', endDrag);
-fullDancer.addEventListener('touchcancel', endDrag);
-
-function startDrag(event, self) {
-    isDragging = true;
-
-    const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
-    const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
-    console.log(clientX, clientY);
-    isDragging = true;
-    if (self.id + "" === 'full-dancer') {
-        dancerInitialX = clientX;
-        dancerInitialY = clientY;
-    } else {
-        settingsInitialX = clientX;
-        settingsInitialY = clientY;
-    }
-    
-}
-
-let isSliderActive = false;
-
-function drag(event, self) {
-    const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
-    const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
-    if (isDragging && !isSliderActive) {
-        if (self.id + "" === 'full-dancer') {
-            const dx = clientX - dancerInitialX;
-            const dy = clientY - dancerInitialY;
-            const currentX = self.offsetLeft + dx * 10;
-            const currentY = self.offsetTop + dy * 10;
-            const minX = self.offsetWidth/2  - 50;
-            const minY = self.offsetHeight/2  - 30;
-            const maxX = window.innerWidth - minX;
-            const maxY = window.innerHeight - minY;
-            const constrainedX = Math.max(minX, Math.min(maxX, currentX));
-            const constrainedY = Math.max(minY, Math.min(maxY, currentY));
-            self.style.left = constrainedX + 'px';
-            self.style.top = constrainedY + 'px';
-            dancerInitialX = clientX;
-            dancerInitialY = clientY;
-        } else {
-            const dx = clientX - settingsInitialX;
-            const dy = clientY - settingsInitialY;
-            const currentX = self.offsetLeft + dx;
-            const currentY = self.offsetTop + dy;
-            const minX = 0;
-            const minY = 0;
-            const maxX = window.innerWidth - minX;
-            const maxY = window.innerHeight - minY;
-            const constrainedX = Math.max(minX, Math.min(maxX, currentX));
-            const constrainedY = Math.max(minY, Math.min(maxY, currentY));
-            self.style.left = constrainedX + 'px';
-            self.style.top = constrainedY + 'px';
-            settingsInitialX = clientX;
-            settingsInitialY = clientY;
-        }
-        
-    }
-}
-
-
-function endDrag() {
-    isDragging = false;
-}
-
-// ...
-
-const danceSizeSlider = document.getElementById('dance-size-slider');
-const danceRotationSlider = document.getElementById('dance-rotation-slider');
-
-danceSizeSlider.addEventListener('input', () => {
-    isSliderActive = true;
-    console.log('hi')
-    dancerResizer(danceSizeSlider.value);
-});
-
-danceRotationSlider.addEventListener('input', () => {
-    isSliderActive = true;
-    dancerRotation(danceRotationSlider.value/360 * Math.PI * 2);
-});
-
-danceSizeSlider.addEventListener('touchmove', (event) => {
-    isSliderActive = true;
-    const touch = event.touches[0];
-    let value = (touch.clientX - danceSizeSlider.getBoundingClientRect().left) / danceSizeSlider.offsetWidth * danceSizeSlider.max;
-    if (value > danceSizeSlider.max) value = danceSizeSlider.max;
-    if (value < danceSizeSlider.min) value = danceSizeSlider.min;
-    danceSizeSlider.value = value;
-    dancerResizer(value);
-});
-
-danceRotationSlider.addEventListener('touchmove', (event) => {
-    isSliderActive = true;
-    const touch = event.touches[0];
-    let value = (touch.clientX - danceRotationSlider.getBoundingClientRect().left) / danceRotationSlider.offsetWidth * danceRotationSlider.max;
-    if (value > danceRotationSlider.max) value = danceRotationSlider.max;
-    if (value < danceRotationSlider.min) value = danceRotationSlider.min;
-    danceRotationSlider.value = value;
-    dancerRotation(value / 360 * Math.PI * 2);
-});
-
-danceSizeSlider.addEventListener('touchstart', () => {
-    isSliderActive = true;
-});
-
-danceSizeSlider.addEventListener('touchend', () => {
-    isSliderActive = false;
-});
-
-danceRotationSlider.addEventListener('touchstart', () => {
-    isSliderActive = true;
-});
-
-danceRotationSlider.addEventListener('touchend', () => {
-    isSliderActive = false;
-});
-
-danceSizeSlider.addEventListener('mousedown', () => {
-    isSliderActive = true;
-});
-
-danceSizeSlider.addEventListener('mouseup', () => {
-    isSliderActive = false;
-});
-
-danceRotationSlider.addEventListener('mousedown', () => {
-    isSliderActive = true;
-});
-
-danceRotationSlider.addEventListener('mouseup', () => {
-    isSliderActive = false;
-});
 
 function dancerResizer(size) {
     const controls = document.getElementById('three-controls');
@@ -838,37 +655,32 @@ function dancerResizer(size) {
     document.documentElement.style.height = `${size}px`;
 }
 
-function disableTextInput() {
-    const textInput = document.getElementById('text-input-dancer');
-    const buttonInput = document.getElementById('send-dancer-text');
-    if (textInput.value === "") {
-        return;
-    }
-    buttonInput.disabled = true;
-    textInput.disabled = true;
-}
+
 
 let curInputValue = "";
 const fakeInput = document.getElementById('fake-dancer-input')
-function showInputText(curIndex) {
-    const textInput = document.getElementById('text-input-dancer');
-    textInput.value = " ";
-    const beforeText = curInputValue.substring(0, curIndex);
-    const afterText = curInputValue.substring(curIndex);
-    const coloredText = `<span style="">${beforeText}</span><span style="opacity: 50%">${afterText}</span>`;
-    fakeInput.style.width = textInput.offsetWidth + 'px';
-    fakeInput.innerHTML = coloredText;
-}
 
-function enableTextInput() {
-    const textInput = document.getElementById('text-input-dancer');
-    textInput.disabled = false;
-    textInput.value = "";
-    fakeInput.innerHTML = "";
-    const buttonInput = document.getElementById('send-dancer-text');
-    buttonInput.disabled = false;
-}
 
+window.addEventListener("message", function(event) {
+    console.log("iframe B received:", event.data);
+
+    if (event.data.size) {
+        dancerResizer(event.data.size);
+    }
+    if (event.data.rotation) {
+        dancerRotation(event.data.rotation);
+    }
+    if (event.data.floorVisible !== undefined) {
+        floor.visible = event.data.floorVisible;
+    }
+    if (event.data.soundOn !== undefined) {
+        soundOn = event.data.soundOn;
+    }
+    if(event.data.letter) {
+        handleLiveInput(event.data.letter);
+    }
+    
+});
 
 
 dancerResizer(350);

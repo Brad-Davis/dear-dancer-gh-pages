@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Web Page</title>
+</head>
+<style>
+  #settings-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border: none;
+  }
+
+  #dancer-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border: none;
+  }
+
+  #input-iframe {
+    position: fixed;
+    left: 20px;
+    height: 35px;
+    border: #25408F solid 2px;
+    left: 20px;
+    bottom: 10px;
+    right: 20px;
+    width: calc(100% - 40px);
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    justify-content: center;
+    /* visibility: hidden; */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    background-color: white;
+    pointer-events: auto;
+  }
+</style>
+<body>
+
+  <iframe id="dancer-iframe" src="/dancer.html" allowtransparency="true" style="border: none; width: 100%; height: 100%;"></iframe>
+  <iframe id="settings-iframe" src="/settings.html" allowtransparency="true" style="border: none;"></iframe>
+  <iframe id="input-iframe" src="/input.html" allowtransparency="true" style="border: none;"></iframe>
+  <script>
+
+   
+    const dancerIframe = document.getElementById('dancer-iframe');
+    const settingsIframe = document.getElementById('settings-iframe');
+    const inputIframe = document.getElementById('input-iframe');
+
+
+    // Optionally relay back from iframeB to iframeA
+    window.addEventListener("message", function(event) {
+      if (event.source === settingsIframe.contentWindow) {
+        dancerIframe.contentWindow.postMessage(event.data, "*");
+        if (event.data.size) {
+          dancerIframe.style.width = event.data.size + "px";
+          dancerIframe.style.height = event.data.size + "px";
+        }
+      }
+      if (event.source === dancerIframe.contentWindow) {
+        console.log("HELLO??")
+        inputIframe.contentWindow.postMessage(event.data, "*");
+        settingsIframe.contentWindow.postMessage(event.data, "*");
+      }
+    });
+
+
+
+    window.addEventListener("showSettings", function(event) {
+      // Validate origin if cross-origin
+      if (event.source === settingsIframe.contentWindow) {
+        dancerIframe.contentWindow.postMessage(event.data, "*"); // replace "*" with exact origin if needed
+      }
+    });
+
+    // Set the width and height of settings-iframe to match the child body/html
+    settingsIframe.addEventListener("load", function() {
+      const settingsDocument = settingsIframe.contentDocument || settingsIframe.contentWindow.document;
+      const settingsBody = settingsDocument.body;
+      const settingsHtml = settingsDocument.documentElement;
+      settingsIframe.style.width = settingsBody.scrollWidth + "px";
+      settingsIframe.style.height = settingsBody.scrollHeight + "px";
+      let settingsInitialX =  settingsDocument.offsetLeft;
+      let settingsInitialY =  settingsDocument.offsetTop;
+      let isDragging = false;
+
+      function startDrag(event, self) {
+          console.log(event);
+          console.log(self);
+          isDragging = true;
+
+          const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+          const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+          console.log(clientX, clientY);
+          isDragging = true;
+          settingsInitialX = clientX;
+          settingsInitialY = clientY;
+          
+      }
+
+      let isSliderActive = false;
+
+      function drag(event, self) {
+        console.log(self);
+          const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+          const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
+          if (isDragging && !isSliderActive) {
+
+                  const dx = clientX - settingsInitialX;
+                  const dy = clientY - settingsInitialY;
+                  const currentX = self.offsetLeft + dx;
+                  const currentY = self.offsetTop + dy;
+                  const minX = 0;
+                  const minY = 0;
+                  const maxX = window.innerWidth - minX;
+                  const maxY = window.innerHeight - minY;
+                  const constrainedX = Math.max(minX, Math.min(maxX, currentX));
+                  const constrainedY = Math.max(minY, Math.min(maxY, currentY));
+                  self.style.left = constrainedX + 'px';
+                  self.style.top = constrainedY + 'px';
+                  settingsInitialX = clientX;
+                  settingsInitialY = clientY;
+          }
+      }
+
+      function endDrag() {
+        isDragging = false;
+      }
+
+
+      settingsIframe.contentWindow.document.addEventListener('mousedown', (event) => startDrag(event, settingsIframe));
+      settingsIframe.contentWindow.document.addEventListener('mousemove', (event) => drag(event, settingsIframe));
+      settingsIframe.contentWindow.document.addEventListener('mouseup', endDrag);
+      settingsIframe.contentWindow.document.addEventListener('mouseleave', endDrag);
+
+      settingsIframe.contentWindow.document.addEventListener('touchstart', (event) => startDrag(event, settingsIframe));
+      settingsIframe.contentWindow.document.addEventListener('touchmove', (event) => drag(event, settingsIframe));
+      settingsIframe.contentWindow.document.addEventListener('touchend', endDrag);
+      settingsIframe.contentWindow.document.addEventListener('touchcancel', endDrag);
+
+      const danceSizeSlider = settingsIframe.contentWindow.document.getElementById('dance-size-slider');
+      const danceRotationSlider = settingsIframe.contentWindow.document.getElementById('dance-rotation-slider');
+
+      danceSizeSlider.addEventListener('touchstart', () => {
+          isSliderActive = true;
+      });
+
+      danceSizeSlider.addEventListener('touchend', () => {
+          isSliderActive = false;
+      });
+
+      danceRotationSlider.addEventListener('touchstart', () => {
+          isSliderActive = true;
+      });
+
+      danceRotationSlider.addEventListener('touchend', () => {
+          isSliderActive = false;
+      });
+
+      danceSizeSlider.addEventListener('mousedown', () => {
+          isSliderActive = true;
+      });
+
+      danceSizeSlider.addEventListener('mouseup', () => {
+          isSliderActive = false;
+      });
+
+      danceRotationSlider.addEventListener('mousedown', () => {
+          isSliderActive = true;
+      });
+
+      danceRotationSlider.addEventListener('mouseup', () => {
+          isSliderActive = false;
+      });
+
+    });
+    dancerIframe.addEventListener("load", function() {
+      const dancerDocument = dancerIframe.contentDocument || dancerIframe.contentWindow.document;
+      const dancerBody = dancerDocument.body;
+      const dancerHtml = dancerDocument.documentElement;
+      dancerIframe.style.width = dancerBody.scrollWidth + "px";
+      dancerIframe.style.height = dancerBody.scrollHeight + "px";
+
+      let isDragging = false;
+      let dancerInitialX =  dancerDocument.offsetLeft;
+      let dancerInitialY =  dancerDocument.offsetTop;
+      console.log(dancerInitialX, dancerInitialY);
+
+      document.addEventListener('keydown', (e) => {
+        console.log(e);
+        dancerIframe.contentWindow.postMessage({ letter: e.key }, "*");
+    });
+
+
+      function startDrag(event, self) {
+          console.log(event);
+          console.log(self);
+          isDragging = true;
+
+          const clientX = event.type === 'touchstart' ? event.touches[0].clientX : event.clientX;
+          const clientY = event.type === 'touchstart' ? event.touches[0].clientY : event.clientY;
+          console.log(clientX, clientY);
+          isDragging = true;
+          dancerInitialX = clientX;
+          dancerInitialY = clientY;
+      
+          
+      }
+
+      let isSliderActive = false;
+
+      function drag(event, self) {
+          const clientX = event.type === 'touchmove' ? event.touches[0].clientX : event.clientX;
+          const clientY = event.type === 'touchmove' ? event.touches[0].clientY : event.clientY;
+          if (isDragging && !isSliderActive) {
+              const dx = clientX - dancerInitialX;
+              const dy = clientY - dancerInitialY;
+              const currentX = self.offsetLeft + dx;
+              const currentY = self.offsetTop + dy;
+              const minX = self.offsetWidth/2  - 50;
+              const minY = self.offsetHeight/2  - 30;
+              const maxX = window.innerWidth - minX;
+              const maxY = window.innerHeight - minY;
+              const constrainedX = Math.max(minX, Math.min(maxX, currentX));
+              const constrainedY = Math.max(minY, Math.min(maxY, currentY));
+              self.style.left = constrainedX + 'px';
+              self.style.top = constrainedY + 'px';
+              dancerInitialX = clientX;
+              dancerInitialY = clientY;
+          }
+      }
+
+
+      function endDrag() {
+          isDragging = false;
+      }
+
+      dancerIframe.contentWindow.document.addEventListener('mousedown', (event) => startDrag(event,  dancerIframe));
+      dancerIframe.contentWindow.document.addEventListener('mousemove', (event) => drag(event,  dancerIframe));
+      dancerIframe.contentWindow.document.addEventListener('mouseup', endDrag);
+      dancerIframe.contentWindow.document.addEventListener('mouseleave', endDrag);
+
+      dancerIframe.contentWindow.document.addEventListener('touchstart', (event) => startDrag(event, dancerIframe));
+      dancerIframe.contentWindow.document.addEventListener('touchmove', (event) => drag(event, dancerIframe));
+      dancerIframe.contentWindow.document.addEventListener('touchend', endDrag);
+      dancerIframe.contentWindow.document.addEventListener('touchcancel', endDrag);
+    });
+  
+  </script>
+
+        
+      </script>
+</body>
+</html>
