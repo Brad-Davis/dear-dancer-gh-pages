@@ -410,7 +410,7 @@ async function runQueue() {
         moveOnType(20);
         playClickSound();
         
-        // showInputText(curInputIndex)
+        showInputText(curInputIndex)
         const duration = alphabeticalAnimations[index].duration / updateSpeed;
         //Remove letter!
         fadeBetweenWeights(index, globalFadeDuration);
@@ -477,54 +477,10 @@ async function handleLiveInput(event) {
 }
 
 const sendDancerTextButton = document.getElementById('send-dancer-text');
-const textInputButton = document.getElementById('dancer-input-button');
-textInputButton.addEventListener('click', toggleTextInput);
-textInputButton.addEventListener('touchend', toggleTextInput);
-
-function toggleTextInput() {
-    liveTextInput = !liveTextInput;
-    console.log("live text: " + liveTextInput)
-    textInputButton.classList.toggle('active');
-    window.parent.postMessage({liveTextInput: liveTextInput}, "*");
-}  
-
-// sendDancerTextButton.addEventListener('click', sendDancerText);
+sendDancerTextButton.addEventListener('click', sendDancerText);
 // const textInputDancer = document.getElementById('text-input-dancer');
 // textInputDancer.addEventListener('keydown', handleSendDancerTextKey);
 
-
-let curInputIndex = 0;
-function sendDancerText() {
-    // const textInput = document.getElementById('text-input-dancer');
-    // const text = textInput.value;
-    // disableTextInput();
-    curInputValue = text;
-    curInputIndex = 0;
-    for(let i = 0; i < text.length; i++) {
-        const key = text[i];
-        if (key.length > 1 && key !== ' ') {
-            return;
-        }
-        const letter = String.fromCharCode(key.charCodeAt(0)).toUpperCase();
-        
-        let index = letter.charCodeAt(0) - 65;
-    
-        if (index < 0 || index > 25) {
-            if (key === ' ') {
-                index = 26; // Assuming space is at index 26
-            } else {
-                return;
-            }
-        }
-        
-        textQueue.enqueue(index);
-        // updateTextQueueDisplay();
-        if (!isAnimationRunning) {
-            isAnimationRunning = true;
-            runQueue();
-        }
-    }
-}
 
 function dancerRotation(rotation) {
     globalDancer.rotation.y = rotation;
@@ -624,29 +580,10 @@ function moveOnEnter() {
 window.fadeBetweenWeights = fadeBetweenWeights; 
 
 
-
-
-
-const settingsButton = document.getElementById('dancer-settings-button');
-
-settingsButton.addEventListener('click', toggleSettings);
-settingsButton.addEventListener('touchend', toggleSettings);
-let showSettings = false;
-
-function toggleSettings() {
-    settingsButton.classList.toggle('active');
-    showSettings = !showSettings;
-    window.parent.postMessage({showSettings: showSettings}, "*");
-}
-
-
 // ...
 
 
 function dancerResizer(size) {
-    const controls = document.getElementById('three-controls');
-    controls.style.width = `${size}px`;
-    controls.style.top = `-${size * (1/4)}px`;
     canvas.style.width = `${size}px`;
     canvas.style.height = `${size}px`;
     fullDancer.style.width = `${size}px`;
@@ -659,33 +596,102 @@ function dancerResizer(size) {
 
 
 
-let curInputValue = "";
-const fakeInput = document.getElementById('fake-dancer-input')
 
 
-window.addEventListener("message", function(event) {
-    console.log("iframe B received:", event.data);
-
-    if (event.data.size) {
-        dancerResizer(event.data.size);
-    }
-    if (event.data.rotation) {
-        dancerRotation(event.data.rotation);
-    }
-    if (event.data.floorVisible !== undefined) {
-        floor.visible = event.data.floorVisible;
-    }
-    if (event.data.soundOn !== undefined) {
-        soundOn = event.data.soundOn;
-    }
-    if(event.data.letter) {
-        handleLiveInput(event.data.letter);
-    }
-    
-});
 
 
 dancerResizer(350);
 
 // queue.js
 
+// INPUT STUFF
+
+const textInputDancer = document.getElementById('text-input-dancer');
+textInputDancer.addEventListener('keydown', handleSendDancerTextKey);
+
+function handleSendDancerTextKey(event) {
+    if (event.key === 'Enter') {
+        sendDancerText();
+    }
+}
+
+let curInputIndex = 0;
+function sendDancerText() {
+    const textInput = document.getElementById('text-input-dancer');
+    const text = textInput.value;
+    disableTextInput();
+    curInputValue = text;
+    curInputIndex = 0;
+    for(let i = 0; i < text.length; i++) {
+        const key = text[i];
+        if (key.length > 1 && key !== ' ') {
+            return;
+        }
+        const letter = String.fromCharCode(key.charCodeAt(0)).toUpperCase();
+        
+        let index = letter.charCodeAt(0) - 65;
+    
+        if (index < 0 || index > 25) {
+            if (key === ' ') {
+                index = 26; // Assuming space is at index 26
+            } else {
+                return;
+            }
+        }
+        
+        textQueue.enqueue(index);
+        // updateTextQueueDisplay();
+        if (!isAnimationRunning) {
+            isAnimationRunning = true;
+            runQueue();
+        }
+    }
+}
+
+window.addEventListener("message", function(event) {
+    
+    if (event.data.liveTextInput !== undefined) {
+        console.log("input message", event);
+        liveTextInput = event.data.liveTextInput;
+        toggleTextInput(liveTextInput);
+    }
+});
+
+function toggleTextInput(liveText) {
+    console.log("toggleTextInput", liveText);
+    const typingPanel = document.getElementById('text-section-dancer');
+    typingPanel.classList.toggle('active', liveText);
+    liveTextInput = !liveTextInput;
+}  
+
+function disableTextInput() {
+    const textInput = document.getElementById('text-input-dancer');
+    const buttonInput = document.getElementById('send-dancer-text');
+    if (textInput.value === "") {
+        return;
+    }
+    buttonInput.disabled = true;
+    textInput.disabled = true;
+}
+
+let curInputValue = "";
+const fakeInput = document.getElementById('fake-dancer-input');
+
+function showInputText(curIndex) {
+    const textInput = document.getElementById('text-input-dancer');
+    textInput.value = " ";
+    const beforeText = curInputValue.substring(0, curIndex);
+    const afterText = curInputValue.substring(curIndex);
+    const coloredText = `<span style="">${beforeText}</span><span style="opacity: 50%">${afterText}</span>`;
+    fakeInput.style.width = textInput.offsetWidth + 'px';
+    fakeInput.innerHTML = coloredText;
+}
+
+function enableTextInput() {
+    const textInput = document.getElementById('text-input-dancer');
+    textInput.disabled = false;
+    textInput.value = "";
+    fakeInput.innerHTML = "";
+    const buttonInput = document.getElementById('send-dancer-text');
+    buttonInput.disabled = false;
+}

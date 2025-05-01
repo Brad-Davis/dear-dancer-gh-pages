@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Canvas</title>
+    <style>
+        /* styles.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    width: 500px; /* Set fixed width */
+    height: 500px; /* Set fixed height */
+    font-family: "Source Code Pro", monospace;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+}
+
+#full-dancer {
+    display: block;
+    width: 500px;
+    height: 500px;
+    transition: all 0.1s ease;
+    pointer-events: auto;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#three-controls {
+    display: flex;
+    justify-content: space-evenly; /* Updated to space-between */
+    position: relative;
+    top: -87.5px;
+    width: 100%;
+}
+
+#full-dancer #three-controls div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #25408F;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#full-dancer:hover #three-controls div {
+    opacity: 1;
+}
+
+#three-controls div button {
+    border-radius: 100%;
+    width: 35px;
+    height: 35px;
+    color: #25408F;
+    border-color: #25408F;
+    background-color: white;
+    cursor: pointer;
+    z-index: 3;
+}
+
+#three-controls div button.active {
+    background-color: #25408F;
+    color: white;
+}
+
+#inputDiv {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    height: 24px;
+    font-size: 16px;
+}
+
+.switch-dancer {
+    top: 4px;
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .switch-dancer input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider-dancer {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border: 2px solid white;
+  }
+
+  #dance-size-slider, #dance-rotation-slider {
+    appearance :none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+
+  #dancer-slider-line {
+    position: relative;
+    bottom: 19px;
+    width: 100%;
+    height: 1px;
+    background-color: white;
+    z-index: 0;
+  }
+
+  #dance-size-slider[type='range']::-webkit-slider-thumb, #dance-rotation-slider[type='range']::-webkit-slider-thumb {
+    width: 17px;
+    -webkit-appearance: none;
+    height: 17px;
+    cursor: ew-resize;
+    background: #25408F;
+    border-radius: 100%;
+    box-shadow: 0px 0 0 2px white;
+  }
+
+  .slider-dancer:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 0;
+    bottom: 0;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider-dancer {
+    background-color: #25408F;
+  }
+  
+  input:focus + .slider-dancer {
+    box-shadow: 0 0 1px #25408F;
+  }
+  
+  input:checked + .slider-dancer:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+  }
+  
+  /* Rounded slider-dancers */
+  .slider-dancer.round-dancer {
+    border-radius: 17px;
+  }
+  
+  .slider-dancer.round-dancer:before {
+    border-radius: 50%;
+  }
+
+  #dancer-settings-panel {
+    position: fixed;
+    top: calc(50% - 100px);
+    left: calc(100% - 200px);
+    background-color: #25408F;
+    color: white;
+    padding: 15px;
+    border-radius: 35px;
+    font-size: 1.2em;
+    display: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+  }
+
+  #dancer-settings-panel p, #dancer-settings-panel span, #three-controls span {
+   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
+  }
+
+  #dancer-floor {
+    padding-bottom: 10px;
+  }
+
+  #dancer-settings-panel.active {
+    display: block;
+  }
+
+  #dancer-settings-panel input {
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  #dancer-settings-panel p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  #dancer-settings-panel #dancer-sound {
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  #text-section-dancer {
+    position: fixed;
+    left: 20px;
+    height: 35px;
+    border-radius: 25px;
+    border: #25408F solid 2px;
+    left: 20px;
+    bottom: 10px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    background-color: white;
+    pointer-events: auto;
+  }
+
+  @media (max-width: 768px) {
+    #text-section-dancer {
+      bottom: 130px; /* Adjust the bottom position for mobile */
+    }
+  }
+
+  #text-section-dancer.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    font-family: "Source Code Pro", monospace;
+    pointer-events: none;
+}
+
+.switch-dancer {
+    top: 4px;
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .switch-dancer input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  #fake-dancer-input {
+    position: absolute;
+    text-align: center;
+    color: #25408F;
+    font-size: 1.2em;
+    z-index: -1;
+    left: 0;
+    font-family: "Source Code Pro", monospace;
+  }
+  
+  /* The slider */
+  .slider-dancer {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border: 2px solid white;
+  }
+
+  #dance-size-slider, #dance-rotation-slider {
+    appearance :none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+
+  #dancer-slider-line {
+    position: relative;
+    bottom: 19px;
+    width: 100%;
+    height: 1px;
+    background-color: white;
+    z-index: 0;
+  }
+
+  #dance-size-slider[type='range']::-webkit-slider-thumb, #dance-rotation-slider[type='range']::-webkit-slider-thumb {
+    width: 17px;
+    -webkit-appearance: none;
+    height: 17px;
+    cursor: ew-resize;
+    background: #25408F;
+    border-radius: 100%;
+    box-shadow: 0px 0 0 2px white;
+  }
+
+  .slider-dancer:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 0;
+    bottom: 0;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider-dancer {
+    background-color: #25408F;
+  }
+  
+  input:focus + .slider-dancer {
+    box-shadow: 0 0 1px #25408F;
+  }
+  
+  input:checked + .slider-dancer:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+  }
+  
+  /* Rounded slider-dancers */
+  .slider-dancer.round-dancer {
+    border-radius: 17px;
+  }
+  
+  .slider-dancer.round-dancer:before {
+    border-radius: 50%;
+  }
+
+  #dancer-settings-panel {
+    position: fixed;
+    top: calc(50% - 100px);
+    left: calc(100% - 200px);
+    background-color: #25408F;
+    color: white;
+    padding: 15px;
+    border-radius: 35px;
+    font-size: 1.2em;
+    display: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+  }
+
+
+
+  #dancer-settings-panel p, #dancer-settings-panel span, #three-controls span {
+   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
+  }
+
+  #dancer-floor {
+    padding-bottom: 10px;
+  }
+
+  #dancer-settings-panel.active {
+    display: block;
+  }
+
+  #dancer-settings-panel input {
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+
+  #dancer-settings-panel p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  #dancer-settings-panel #dancer-sound {
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  #text-input-dancer {
+    width: 100%;
+    border-radius: 25px 0 0 25px;
+    height: 100%;
+    border: none;
+    background-color: transparent;
+    color: #25408F;
+    font-size: 1.2em;
+    text-align: center;
+    border: transparent;
+    border-right: 0 solid;
+    font-family: "Source Code Pro", monospace;
+    outline: none;
+    pointer-events: auto;
+  }
+
+  #text-input-dancer::placeholder{
+    color: #25408F;
+    opacity: 0.5;
+    font-family: "Source Code Pro", monospace;
+  }
+
+  #text-section-dancer.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+
+  #send-dancer-text {
+    background: transparent;
+    border: none;
+    color: #25408F;
+    padding: 0;
+    cursor: pointer;
+    width: 40px;
+  }
+
+
+  @media (max-width: 768px) {
+    #text-section-dancer {
+      bottom: 130px; /* Adjust the bottom position for mobile */
+    }
+  }
+
+
+
+
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/",
+            "three/examples/" : "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/",
+            "lodash": "https://cdn.jsdelivr.net/npm/lodash-es@4.17.21/lodash.js"
+          }
+        }
+      </script>
+</head>
+<body>
+    <div id="full-dancer">
+      <canvas id="three-canvas">
+      </canvas>
+    </div>
+    <div id="text-section-dancer">
+        <input type="text" id="text-input-dancer" placeholder="type to dance"></input>
+        <div id="fake-dancer-input"></div>
+        <button id="send-dancer-text"><i class="fas fa-arrow-right"></i></button>
+    </div>
+    <script src="./minimalistDancer.js" type="module"></script>
+</body>
+</html>

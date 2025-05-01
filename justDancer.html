@@ -35,8 +35,6 @@
 <body>
 
   <iframe id="dancer-iframe" src="/dancer.html" allowtransparency="true" style="border: none; width: 100%; height: 100%;"></iframe>
-  <iframe id="settings-iframe" src="/settings.html" allowtransparency="true" style="border: none;"></iframe>
-  <iframe id="input-iframe" src="/input.html" allowtransparency="true" style="border: none;"></iframe>
   <script>
 
    
@@ -49,15 +47,8 @@
       dancerIframe.style.width = 350 + "px";
       dancerIframe.style.height = 350 + "px";
 
-      let isDragging = false;
-      let dancerInitialX =  dancerDocument.offsetLeft;
-      let dancerInitialY =  dancerDocument.offsetTop;
-      console.log(dancerInitialX, dancerInitialY);
 
-      document.addEventListener('keydown', (e) => {
-        console.log(e);
-        dancerIframe.contentWindow.postMessage({ letter: e.key }, "*");
-    });
+      document.addEventListener('keydown', handleLiveInput);
 
 
       function startDrag(event, self) {
