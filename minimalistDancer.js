@@ -9,8 +9,6 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { TTFLoader } from 'three/examples/jsm/loaders/TTFLoader.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'; // Add this line
 
 class Queue {
     constructor() {
@@ -158,7 +156,6 @@ composer.addPass(new RenderPass(scene, camera));
 // outlinePass.hiddenEdgeColor.set('#ffffff');
 // composer.addPass(outlinePass);
 
-const fontLoader = new FontLoader();
 
 
 
@@ -209,10 +206,6 @@ loader.load('./allLettersV3.glb', async (gltf) => {
     const cloth = gltf.scene.getObjectByName('Cloth');
     cloth.visible = false;
 
-    const ttfLoader = new TTFLoader();
-    await ttfLoader.load('./fonts/SpecialElite-Regular.ttf', (json) => {
-        font = fontLoader.parse(json);
-    });
 
     gltf.scene.traverse((child) => {
         if (child.isMesh) {
