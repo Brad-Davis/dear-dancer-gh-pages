@@ -396,9 +396,12 @@ let prevActionIndex = null;
 
 async function runQueue() {
     while (!textQueue.isEmpty()) {
+        console.log(textQueue)
         const index = textQueue.dequeue();
+        console.log(index);
         curInputIndex += 1;
-        if (index === undefined) {
+        showInputText(curInputIndex)
+        if (index === undefined || index === -1) {
             continue;
         }
         if (index == 26) {
@@ -410,7 +413,6 @@ async function runQueue() {
         moveOnType(20);
         playClickSound();
         
-        showInputText(curInputIndex)
         const duration = alphabeticalAnimations[index].duration / updateSpeed;
         //Remove letter!
         fadeBetweenWeights(index, globalFadeDuration);
@@ -422,7 +424,7 @@ async function runQueue() {
         prevActionIndex = index;
     }
     fadeToZero();
-    // enableTextInput();
+    enableTextInput();
     isAnimationRunning = false;
 }
 
@@ -624,8 +626,9 @@ function sendDancerText() {
     curInputIndex = 0;
     for(let i = 0; i < text.length; i++) {
         const key = text[i];
+        console.log("key", key);
         if (key.length > 1 && key !== ' ') {
-            return;
+            continue; // Skip multi-character keys (but continue processing)
         }
         const letter = String.fromCharCode(key.charCodeAt(0)).toUpperCase();
         
@@ -635,7 +638,7 @@ function sendDancerText() {
             if (key === ' ') {
                 index = 26; // Assuming space is at index 26
             } else {
-                return;
+                index = -1
             }
         }
         
@@ -679,6 +682,8 @@ const fakeInput = document.getElementById('fake-dancer-input');
 
 function showInputText(curIndex) {
     const textInput = document.getElementById('text-input-dancer');
+    console.log("showInputText", curIndex);
+    console.log(fakeInput.innerHTML);
     textInput.value = " ";
     const beforeText = curInputValue.substring(0, curIndex);
     const afterText = curInputValue.substring(curIndex);
