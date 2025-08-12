@@ -581,8 +581,18 @@ window.fadeBetweenWeights = fadeBetweenWeights;
 
 function dancerResizer() {
     // Get the container dimensions
-    const containerWidth = fullDancer.clientWidth;
-    const containerHeight = fullDancer.clientHeight;
+    let containerWidth = fullDancer.clientWidth;
+    let containerHeight = fullDancer.clientHeight;
+    
+    // Fallback for iframe scenarios where container might not be sized yet
+    if (containerWidth === 0 || containerHeight === 0) {
+        containerWidth = window.innerWidth;
+        containerHeight = window.innerHeight;
+    }
+    
+    // Ensure minimum dimensions
+    containerWidth = Math.max(containerWidth, 300);
+    containerHeight = Math.max(containerHeight, 300);
     
     // Update canvas size to match container
     canvas.style.width = `${containerWidth}px`;
@@ -597,6 +607,9 @@ function dancerResizer() {
     
     // Update composer size for post-processing effects
     composer.setSize(containerWidth, containerHeight);
+    
+    // Debug logging for iframe issues
+    console.log(`Dancer resized to: ${containerWidth}x${containerHeight}`);
 }
 
 
@@ -605,13 +618,32 @@ function dancerResizer() {
 
 
 
-// Initial call to set up responsive sizing
-dancerResizer();
+// Initial call to set up responsive sizing with delay for iframe loading
+setTimeout(() => {
+    dancerResizer();
+}, 100);
+
+// Additional calls with increasing delays to handle iframe loading timing
+setTimeout(() => {
+    dancerResizer();
+}, 500);
+
+setTimeout(() => {
+    dancerResizer();
+}, 1000);
 
 // Add window resize listener for responsive behavior
 window.addEventListener('resize', () => {
     dancerResizer();
 });
+
+// Add a resize observer for better iframe support
+if (window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver(() => {
+        dancerResizer();
+    });
+    resizeObserver.observe(document.body);
+}
 
 // queue.js
 
@@ -666,6 +698,12 @@ window.addEventListener("message", function(event) {
         console.log("input message", event);
         liveTextInput = event.data.liveTextInput;
         toggleTextInput(liveTextInput);
+    }
+    
+    // Handle resize messages from parent iframe
+    if (event.data.resize) {
+        console.log("Received resize message from parent");
+        dancerResizer();
     }
 });
 
