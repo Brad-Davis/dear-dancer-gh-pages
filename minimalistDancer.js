@@ -72,11 +72,12 @@ const fullDancer = document.getElementById('full-dancer');
 const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true, alpha: true});
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-renderer.setSize(canvas.clientHeight, canvas.clientWidth);
+// Initial size will be set by dancerResizer function
 renderer.setPixelRatio( window.devicePixelRatio );
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000); // Aspect ratio will be set by dancerResizer
+// const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
 // scene.background = new THREE.Color(0xffffff); // Set background color to black
 // camera.position.z = 200;
 camera.position.z = 3;
@@ -193,7 +194,7 @@ let globalLetter;
 let globalDancer;
 
 loader.load('./allLettersV3.glb', async (gltf) => {
-    dancerResizer(350);
+    dancerResizer();
     clock = new THREE.Clock();
     gltf.scene.scale.set(1,1, 1); 
     globalDancer = gltf.scene;
@@ -578,15 +579,24 @@ window.fadeBetweenWeights = fadeBetweenWeights;
 // ...
 
 
-function dancerResizer(size) {
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-    fullDancer.style.width = `${size}px`;
-    fullDancer.style.height = `${size}px`;
-    document.body.style.width = `${size}px`;
-    document.body.style.height = `${size}px`;
-    document.documentElement.style.width = `${size}px`;
-    document.documentElement.style.height = `${size}px`;
+function dancerResizer() {
+    // Get the container dimensions
+    const containerWidth = fullDancer.clientWidth;
+    const containerHeight = fullDancer.clientHeight;
+    
+    // Update canvas size to match container
+    canvas.style.width = `${containerWidth}px`;
+    canvas.style.height = `${containerHeight}px`;
+    
+    // Update renderer size
+    renderer.setSize(containerWidth, containerHeight);
+    
+    // Update camera aspect ratio
+    camera.aspect = containerWidth / containerHeight;
+    camera.updateProjectionMatrix();
+    
+    // Update composer size for post-processing effects
+    composer.setSize(containerWidth, containerHeight);
 }
 
 
@@ -595,7 +605,13 @@ function dancerResizer(size) {
 
 
 
-dancerResizer(350);
+// Initial call to set up responsive sizing
+dancerResizer();
+
+// Add window resize listener for responsive behavior
+window.addEventListener('resize', () => {
+    dancerResizer();
+});
 
 // queue.js
 
